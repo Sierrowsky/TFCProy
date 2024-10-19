@@ -1,69 +1,73 @@
-import pygame
+import pygame as pg
+import json
+import constants as c
+from enemy import Enemy
+from world import World
+ #initialise pygame
+pg.init()
 
-pygame.init()
+#create clock
+clock = pg.time.Clock()
 
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 720
 
-screen = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 
-soldier = pygame.image.load("Soldier.png").convert_alpha()
+# create game window
+screen = pg.display.set_mode((c.SCREEN_WIDTH,c.SCREEN_HEIGHT))
+pg.display.set_caption("Tower Defense")
 
-player = soldier.get_rect()
+#load images
+#map
+map_image = pg.image.load('assets/images/levels/level.png').convert_alpha()
+#enemies
+enemy_image = pg.image.load('assets/images/enemies/enemy_1.png').convert_alpha()
 
-clock = pygame.time.Clock()
+#load json data
+with open('assets/images/levels/level.tmj' ) as file:
+    world_data = json.load(file)
 
-top = pygame.Rect(0,0,SCREEN_WIDTH,10)
-left = pygame.Rect(0,0,10,SCREEN_HEIGHT)
-bot = pygame.Rect(0,SCREEN_HEIGHT-10,SCREEN_WIDTH,10)
-right = pygame.Rect(SCREEN_WIDTH-10,0,10,SCREEN_HEIGHT)
- 
 
-clicked = False
+#create world
+world = World(world_data, map_image)
+world.process_data()
 
-text_font= pygame.font.Font("turok.otf",30)
 
-def draw_text(text,font,text_col,x,y):
-    img = font.render(text, True, text_col)
-    screen.blit(img,(x,y))
+#create groups
+enemy_group = pg.sprite.Group()
+
+
+enemy = Enemy(world.waypoints,enemy_image)
+enemy_group.add(enemy)
+
+print(enemy)
+#game loop
 run = True
 while run:
-    clock.tick(60)
 
-    screen.fill((0,0,0))
+    clock.tick(c.FPS)
+
+    screen.fill("grey100")
+
+    #draw level
+    world.draw(screen)
+
+    #draw enemy path
+    pg.draw.lines(screen,"gray0",False,world.waypoints)
+
+    #update groups
+    enemy_group.update()
+
+    #create groups
+    enemy_group.draw(screen)
+
     
-    pygame.draw.rect(screen,(125,125,125),top)
-    pygame.draw.rect(screen,(125,125,125),left)
-    pygame.draw.rect(screen,(125,125,125),right)
-    pygame.draw.rect(screen,(125,125,125),bot)
 
-
-    draw_text("Hello World", text_font,(255,255,255),220,115)
-    screen.blit(soldier,player)
-    key = pygame.key.get_pressed()
-    if key[pygame.K_a]==True and not player.colliderect(left):
-        player.move_ip(-1,0)
-    elif key[pygame.K_d]==True and not player.colliderect(right):
-        player.move_ip(1,0)
-    elif key[pygame.K_w]==True and not player.colliderect(top):
-        player.move_ip(0,-1)
-    elif key[pygame.K_s]==True and not player.colliderect(bot):
-        player.move_ip(0,1)
-
-    #pos = pygame.mouse.get_pos()
-    #print(pos)
-
-    #if pygame.mouse.get_pressed()[0] == True:
-    #    print("Left mouse click")
-    #if pygame.mouse.get_pressed()[1] == True:
-    #    print("Middle mouse click")
-    #if pygame.mouse.get_pressed()[2] == True:
-    #    print("Right mouse click")
-
-    for event in pygame.event.get():
-        
-        if event.type == pygame.QUIT:
+    #event handler
+    for evenet in pg.event.get():
+        #quit program
+        if evenet.type == pg.QUIT:
             run = False
-    pygame.display.flip()
 
-pygame.quit()
+    #update display
+    pg.display.update()
+
+pg.quit()
