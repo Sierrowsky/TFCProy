@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="3" nextobjectid="8">
+ <editorsettings>
+  <export target="level.tmj" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" source="D:/Tiled/Tiles.tsx"/>
  <layer id="1" name="tilemap" width="15" height="15">
   <data encoding="csv">
@@ -22,7 +25,7 @@
  </layer>
  <objectgroup id="2" name="waypoints">
   <object id="7" x="624" y="-4">
-   <polyline points="0,0 0,196.667 -146,196 -144,98 -528.667,100 -528,484 -384,484 -384,292 -240,292 -240,339.333 48,339.333 48.6667,628 -96,627.333 -96,484 -240.667,483.333 -239.333,627.333 -659.333,628"/>
+   <polyline points="0,0 -0.125,196.042 -144.125,196 -144,99.875 -528.042,100 -528,484 -384,484 -384,292 -240,292 -240.125,339.958 48,339.708 48.1667,628 -96.125,627.958 -96,484 -240.292,483.958 -240.083,627.958 -624.152,628"/>
   </object>
  </objectgroup>
 </map>
