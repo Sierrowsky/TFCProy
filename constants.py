@@ -7,5 +7,6 @@ SCREEN_HEIGHT=Tile_Size * Rows
 FPS = 60
 
 #turret constants
+Turret_levels = 4
 Animation_steps = 8
 Animation_delay = 15
