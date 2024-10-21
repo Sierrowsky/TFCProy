@@ -34,7 +34,7 @@ cursor_turret = pg.image.load('assets/images/turrets/turret.png').convert_alpha(
 turret_spritesheets = []
 for x in range(1,c.Turret_levels + 1):
     turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}.png').convert_alpha()
-turret_spritesheets.append(turret_sheet)
+    turret_spritesheets.append(turret_sheet)
 #buttons
 buy_turret_img = pg.image.load('assets/images/side_panel/buy_turret.png').convert_alpha()
 cancel_img = pg.image.load('assets/images/side_panel/cancel.png').convert_alpha()
