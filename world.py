@@ -1,12 +1,18 @@
 import pygame as pg
+import random
+from enemy_data import Enemy_Spawn_Data
 
 class World():
     def __init__(self, data, map_image):
+        self.level = 1
         self.tile_map = []
         self.waypoints = []
         self.level_data = data
         self.image = map_image
-    
+        self.enemy_list= []
+        self.spawned_enemy = 0
+
+
     def process_data(self):
         #look through data to extract info 
         for layer in self.level_data["layers"]:
@@ -27,3 +33,12 @@ class World():
             self.waypoints.append((temp_x, temp_y))
     def draw( self,surface):
         surface.blit(self.image,(0,0))
+
+    def process_enemys(self):
+        enemies = Enemy_Spawn_Data[self.level - 1]
+        for enemy_type in enemies:
+            enemies_to_spawn = enemies[enemy_type]
+            for enemy in range(enemies_to_spawn):
+                self.enemy_list.append(enemy_type)
+        # now randomize list
+        random.shuffle(self.enemy_list)

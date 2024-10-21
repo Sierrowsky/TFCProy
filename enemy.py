@@ -1,17 +1,21 @@
 import pygame as pg
 from pygame.math import Vector2
 import math
+from enemy_data import Enemy_Data
 
 class Enemy(pg.sprite.Sprite):
-    def __init__(self, waypoints, image):
+    def __init__(self, enemy_type, waypoints, images):
         self.waypoints = waypoints
         self.pos = Vector2(self.waypoints[0])
         self.target_waypoint = 1
-        self.speed = 2
+
+        enemy_data = Enemy_Data.get(enemy_type)
+        self.health = enemy_data.get("health")
+        self.speed = enemy_data.get("speed")
         self.angle = 0
         pg.sprite.Sprite.__init__(self)
-        self.original_image = image
-        self.image = image
+        self.original_image = images.get(enemy_type)
+        self.image = images
         self.image = pg.transform.rotate(self.original_image,self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
