@@ -23,11 +23,11 @@ class Enemy(pg.sprite.Sprite):
 
 
     def update(self, world):
-        self.move()
+        self.move(world)
         self.rotate()
         self.check_alive(world)
 
-    def move(self):
+    def move(self,world):
         #define a target waypoint
         if self.target_waypoint < len(self.waypoints):
             self.target = Vector2(self.waypoints[self.target_waypoint])
@@ -35,6 +35,8 @@ class Enemy(pg.sprite.Sprite):
         else:
             #enemy reach the end
             self.kill()
+            world.health -= 1
+            world.missed_enemies += 1
 
         #calculate distance to target
         dist = self.movement.length()
@@ -61,4 +63,5 @@ class Enemy(pg.sprite.Sprite):
     def check_alive(self,world):
         if self.health <= 0:
             world.money +=c.Kill_reward
+            world.killed_enemies += 1
             self.kill()

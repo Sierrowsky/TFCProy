@@ -20,6 +20,9 @@ screen = pg.display.set_mode((c.SCREEN_WIDTH + c.Side_Panel,c.SCREEN_HEIGHT))
 pg.display.set_caption("Tower Defense")
 
 #game variables
+game_over = False
+game_outcome = 0 # -1 is lose & 1 is win
+level_started = False
 placing_turrets = False
 selected_turret = None
 last_enemy_spawn = pg.time.get_ticks()
@@ -45,6 +48,7 @@ for x in range(1,c.Turret_levels + 1):
 buy_turret_img = pg.image.load('assets/images/side_panel/buy_turret.png').convert_alpha()
 cancel_img = pg.image.load('assets/images/side_panel/cancel.png').convert_alpha()
 upgrade_img = pg.image.load('assets/images/side_panel/upgrade_turret.png').convert_alpha()
+start_img = pg.image.load('assets/images/side_panel/begin.png').convert_alpha()
 
 #load json data
 with open('assets/images/levels/level.tmj' ) as file:
@@ -102,7 +106,7 @@ turret_group = pg.sprite.Group()
 turret_burrons = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_img, True)
 cancel_burrons = Button(c.SCREEN_WIDTH + 50, 180, cancel_img, True)
 upgrade_burrons = Button(c.SCREEN_WIDTH + 5, 180, upgrade_img, True)
-#turret_burrons = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_img)
+begin_burrons = Button(c.SCREEN_WIDTH + 30, 240, start_img,True)
 #game loop
 run = True
 while run:
@@ -115,13 +119,19 @@ while run:
     # UPDATING SECTION
     ##############################
 
-    #update groups
-    enemy_group.update(world)
-    turret_group.update(enemy_group)
+    if game_over == False:
+        #check if player has lost
+        if world.health <= 0:
+            game_over = True
+            game_outcome = -1 #loss
 
-    #highlight selected turret
-    if selected_turret:
-        selected_turret.selected = True
+        #update groups
+        enemy_group.update(world)
+        turret_group.update(enemy_group)
+
+        #highlight selected turret
+        if selected_turret:
+            selected_turret.selected = True
 
     ###############################
     # DRAWING SECTION
@@ -138,43 +148,59 @@ while run:
         turret.draw(screen)
     draw_text(str(world.health),text_font,"grey100",0,0)
     draw_text(str(world.money),text_font,"grey100",0,30)
+    draw_text(str(world.level),text_font,"grey100",0,60)
 
-    #spawn enemies
-    if pg.time.get_ticks() - last_enemy_spawn > c.Spawn_cooldown:
-        if world.spawned_enemy < len(world.enemy_list):
-            enemy_type = world.enemy_list[world.spawned_enemy]
-            enemy = Enemy(enemy_type, world.waypoints,enemy_images)
-            enemy_group.add(enemy)
-            world.spawned_enemy += 1
+    if game_over ==False:
+        #check if level has been started or not
+        if level_started != True:
+            if begin_burrons.draw(screen):
+                level_started = True
+        else:
+            #spawn enemies
+            if pg.time.get_ticks() - last_enemy_spawn > c.Spawn_cooldown:
+                if world.spawned_enemy < len(world.enemy_list):
+                    enemy_type = world.enemy_list[world.spawned_enemy]
+                    enemy = Enemy(enemy_type, world.waypoints,enemy_images)
+                    enemy_group.add(enemy)
+                    world.spawned_enemy += 1
+                    last_enemy_spawn = pg.time.get_ticks()
+
+        #check if the wave is finished
+        if world.check_level_completed() == True:
+            world.money += c.level_reward
+            world.level += 1
+            level_started = False
             last_enemy_spawn = pg.time.get_ticks()
+            world.reset_level()
+            world.process_enemys()
 
-    #draw buttons
-    #place turret
-    if turret_burrons.draw(screen):
-        placing_turrets= True
-    #if placing turrets then show cancel button
-    if placing_turrets == True:
-    #show cursor turret
-        cursor_rect = cursor_turret.get_rect()
-        cursor_pos = pg.mouse.get_pos()
-        cursor_rect.center = cursor_pos
-        if cursor_pos[0] <= c.SCREEN_WIDTH:
-            screen.blit(cursor_turret, cursor_rect)
-        if cancel_burrons.draw(screen):
-            placing_turrets = False
-    #if a turret is selected shjow upgrade button
-    if selected_turret:
-        #if a turret can be upgraded the show the upgrade button
-        if selected_turret.upgrade_level < c.Turret_levels:
-            if upgrade_burrons.draw(screen):
-                if world.money >= c.Buy_cost:
-                    selected_turret.upgrade()
-                    world.money -= c.Upgrade_cost
+        #draw buttons
+        #place turret
+        if turret_burrons.draw(screen):
+            placing_turrets= True
+        #if placing turrets then show cancel button
+        if placing_turrets == True:
+        #show cursor turret
+            cursor_rect = cursor_turret.get_rect()
+            cursor_pos = pg.mouse.get_pos()
+            cursor_rect.center = cursor_pos
+            if cursor_pos[0] <= c.SCREEN_WIDTH:
+                screen.blit(cursor_turret, cursor_rect)
+            if cancel_burrons.draw(screen):
+                placing_turrets = False
+        #if a turret is selected shjow upgrade button
+        if selected_turret:
+            #if a turret can be upgraded the show the upgrade button
+            if selected_turret.upgrade_level < c.Turret_levels:
+                if upgrade_burrons.draw(screen):
+                    if world.money >= c.Buy_cost:
+                        selected_turret.upgrade()
+                        world.money -= c.Upgrade_cost
 
 
 
 
-    
+        
 
     
 
