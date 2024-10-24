@@ -7,6 +7,7 @@ import constants as c
 class World():
     def __init__(self, data, map_image):
         self.level = 1
+        self.game_speed = 1
         self.health = c.Health
         self.money = c.Money
         self.tile_map = []

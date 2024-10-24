@@ -1,10 +1,10 @@
 Enemy_Spawn_Data = [
     {
         #1
-        'weak': 1,
+        'weak': 10,
         'medium':0,
         'hard':0,
-        'elite':100
+        'elite':0
     },
     {
         #2

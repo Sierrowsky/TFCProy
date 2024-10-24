@@ -44,11 +44,26 @@ turret_spritesheets = []
 for x in range(1,c.Turret_levels + 1):
     turret_sheet = pg.image.load(f'assets/images/turrets/turret_{x}.png').convert_alpha()
     turret_spritesheets.append(turret_sheet)
+
+
+
 #buttons
 buy_turret_img = pg.image.load('assets/images/side_panel/buy_turret.png').convert_alpha()
 cancel_img = pg.image.load('assets/images/side_panel/cancel.png').convert_alpha()
 upgrade_img = pg.image.load('assets/images/side_panel/upgrade_turret.png').convert_alpha()
 start_img = pg.image.load('assets/images/side_panel/begin.png').convert_alpha()
+restart_img = pg.image.load('assets/images/side_panel/restart.png').convert_alpha()
+ffw_img = pg.image.load('assets/images/side_panel/fast_forward.png').convert_alpha()
+
+
+#gui
+heart_img = pg.image.load('assets/images/gui/heart.png').convert_alpha()
+coin_img = pg.image.load('assets/images/gui/coin.png').convert_alpha()
+logo_img = pg.image.load('assets/images/gui/logo.png').convert_alpha()
+
+#load sounds
+shot_fx = pg.mixer.Sound('assets/sound/shot.wav')
+shot_fx.set_volume(0.5)
 
 #load json data
 with open('assets/images/levels/level.tmj' ) as file:
@@ -62,6 +77,18 @@ large_font = pg.font.SysFont("Consolas",36)
 def draw_text(text,font,text_col,x,y):
     img = font.render(text,True,text_col)
     screen.blit(img,(x,y))
+
+def display_data():
+    #draw panel
+    pg.draw.rect(screen, "maroon", (c.SCREEN_WIDTH, 0, c.Side_Panel, c.SCREEN_HEIGHT))
+    pg.draw.rect(screen, "grey0", (c.SCREEN_WIDTH, 0, c.Side_Panel, 400),2)
+    screen.blit(logo_img,( c.SCREEN_WIDTH, 400))
+    #display data 
+    draw_text("LEVEL : " + str(world.level),text_font,"grey100",c.SCREEN_WIDTH+10 , 10)
+    screen.blit(heart_img,(c.SCREEN_WIDTH + 10 , 65))
+    draw_text(str(world.money),text_font,"grey100",c.SCREEN_WIDTH + 50 ,40)
+    screen.blit(coin_img,(c.SCREEN_WIDTH + 10 , 35))
+    draw_text(str(world.health),text_font,"grey100",c.SCREEN_WIDTH + 50 ,70)
 
 
 def create_turret(mouse_pos):
@@ -77,7 +104,7 @@ def create_turret(mouse_pos):
             if (mouse_tile_x,mouse_tile_y) == (turret.tile_x,turret.tile_y):
                 space = False
         if space == True :
-            new_turret= Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y)
+            new_turret= Turret(turret_spritesheets, mouse_tile_x, mouse_tile_y,shot_fx)
             turret_group.add(new_turret)
             #deduct cost of turret
             world.money -= c.Buy_cost
@@ -103,10 +130,13 @@ enemy_group = pg.sprite.Group()
 turret_group = pg.sprite.Group()
 
 # create buttons
-turret_burrons = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_img, True)
-cancel_burrons = Button(c.SCREEN_WIDTH + 50, 180, cancel_img, True)
-upgrade_burrons = Button(c.SCREEN_WIDTH + 5, 180, upgrade_img, True)
-begin_burrons = Button(c.SCREEN_WIDTH + 30, 240, start_img,True)
+turret_buttons = Button(c.SCREEN_WIDTH + 30, 120, buy_turret_img, True)
+cancel_buttons = Button(c.SCREEN_WIDTH + 50, 180, cancel_img, True)
+upgrade_buttons = Button(c.SCREEN_WIDTH + 5, 180, upgrade_img, True)
+begin_buttons = Button(c.SCREEN_WIDTH + 30, 240, start_img,True)
+restart_buttons = Button(310, 300, restart_img,True)
+ffw_buttons = Button(c.SCREEN_WIDTH + 50, 300, ffw_img,False)
+
 #game loop
 run = True
 while run:
@@ -124,10 +154,13 @@ while run:
         if world.health <= 0:
             game_over = True
             game_outcome = -1 #loss
-
+        #check if player won
+        if world.level > c.Total_levels:
+            game_over = True
+            game_outcome = 1 #Win
         #update groups
         enemy_group.update(world)
-        turret_group.update(enemy_group)
+        turret_group.update(enemy_group,world)
 
         #highlight selected turret
         if selected_turret:
@@ -136,7 +169,7 @@ while run:
     ###############################
     # DRAWING SECTION
     ##############################
-    screen.fill("grey100")
+
 
 
     #draw level
@@ -146,16 +179,22 @@ while run:
     enemy_group.draw(screen)
     for turret in turret_group:
         turret.draw(screen)
-    draw_text(str(world.health),text_font,"grey100",0,0)
-    draw_text(str(world.money),text_font,"grey100",0,30)
-    draw_text(str(world.level),text_font,"grey100",0,60)
+
+
+    display_data()
+
 
     if game_over ==False:
         #check if level has been started or not
         if level_started != True:
-            if begin_burrons.draw(screen):
+            if begin_buttons.draw(screen):
                 level_started = True
         else:
+            #fast forward
+            world.game_speed = 1
+            if ffw_buttons.draw(screen):
+                world.game_speed  = 2
+            
             #spawn enemies
             if pg.time.get_ticks() - last_enemy_spawn > c.Spawn_cooldown:
                 if world.spawned_enemy < len(world.enemy_list):
@@ -176,7 +215,10 @@ while run:
 
         #draw buttons
         #place turret
-        if turret_burrons.draw(screen):
+        #for the turret button show cost and the button
+        draw_text(str(c.Buy_cost),text_font,"grey100",c.SCREEN_WIDTH + 215 ,135)
+        screen.blit(coin_img,(c.SCREEN_WIDTH + 260 , 130))
+        if turret_buttons.draw(screen):
             placing_turrets= True
         #if placing turrets then show cancel button
         if placing_turrets == True:
@@ -186,13 +228,16 @@ while run:
             cursor_rect.center = cursor_pos
             if cursor_pos[0] <= c.SCREEN_WIDTH:
                 screen.blit(cursor_turret, cursor_rect)
-            if cancel_burrons.draw(screen):
+            if cancel_buttons.draw(screen):
                 placing_turrets = False
         #if a turret is selected shjow upgrade button
         if selected_turret:
             #if a turret can be upgraded the show the upgrade button
             if selected_turret.upgrade_level < c.Turret_levels:
-                if upgrade_burrons.draw(screen):
+                #show cost of upgrade
+                draw_text(str(c.Upgrade_cost),text_font,"grey100",c.SCREEN_WIDTH + 215 ,195)
+                screen.blit(coin_img,(c.SCREEN_WIDTH + 260 , 190))
+                if upgrade_buttons.draw(screen):
                     if world.money >= c.Buy_cost:
                         selected_turret.upgrade()
                         world.money -= c.Upgrade_cost
@@ -206,6 +251,29 @@ while run:
 
     #draw enemy path
 #    pg.draw.lines(screen,"gray0",False,world.waypoints)
+
+
+    else:
+        pg.draw.rect(screen,"dodgerblue",(200,200,400,200),border_radius = 30)
+        if game_outcome == -1 :
+            draw_text("ITS JOEVER",large_font ,"grey0",310,230)
+        elif game_outcome == 1:
+            draw_text("ITS WINNER TIME",large_font ,"grey0",315,230)
+        #restart level
+        if restart_buttons.draw(screen):
+            game_over = False
+            level_started = False
+            placing_turrets = False
+            select_turret = None
+            last_enemy_spawn = pg.time.get_ticks()
+            world = World(world_data,map_image)
+            world.process_data()
+            world.process_enemys()
+            #empty groups
+            enemy_group.empty()
+            turret_group.empty()
+        
+
 
 
 

@@ -5,9 +5,9 @@ Side_Panel = 300
 SCREEN_WIDTH=Tile_Size * Cols
 SCREEN_HEIGHT=Tile_Size * Rows
 FPS = 60
-Health = 1
+Health = 100
 Money = 650
-
+Total_levels = 15
 
 #enemy constant
 Spawn_cooldown = 400
