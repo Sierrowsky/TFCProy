@@ -1,0 +1,102 @@
+@startuml
+
+class Enemy {
+    - waypoints: list[tuple[int, int]]
+    - pos: Vector2
+    - target_waypoint: int
+    - health: int
+    - speed: float
+    - angle: float
+    - original_image: Surface
+    - image: Surface
+    - rect: Rect
+    - target: Vector2 or None
+    - movement: Vector2
+    + __init__(enemy_type: str, waypoints: list, images: dict)
+    + update(world: World): void
+    + move(world: World): void
+    + rotate(): void
+    + check_alive(world: World): void
+}
+
+class Turret {
+    - upgrade_level: int
+    - range: int
+    - cooldown: int
+    - last_shot: int
+    - selected: bool
+    - target: Enemy or None
+    - tile_x: int
+    - tile_y: int
+    - x: float
+    - y: float
+    - shot_fex: Sound
+    - sprite_sheets: list[Surface]
+    - animatoin_list: list[Surface]
+    - frame_index: int
+    - update_time: int
+    - angle: float
+    - original_image: Surface
+    - image: Surface
+    - rect: Rect
+    - range_image: Surface
+    - range_rect: Rect
+    + __init__(sprite_sheets: list, tile_x: int, tile_y: int, shot_fx: Sound)
+    + load_images(sprite_sheet: Surface): list[Surface]
+    + update(enemy_group: list[Enemy], world: World): void
+    + pick_target(enemy_group: list[Enemy]): void
+    + play_animation(): void
+    + upgrade(): void
+    + draw(surface: Surface): void
+}
+
+class Button {
+    - image: Surface
+    - rect: Rect
+    - click: bool
+    - single_click: bool
+    + __init__(x: int, y: int, image: Surface, single_click: bool)
+    + draw(surface: Surface): bool
+}
+
+class ImageTextButton {
+    - image: Surface
+    - text: str
+    - font: Font
+    - text_color: tuple[int, int, int]
+    - padding: int
+    - image_rect: Rect
+    - text_rect: Rect
+    - rect: Rect
+    + __init__(x: int, y: int, image: Surface, text: str, font: Font, text_color: tuple, padding: int = 10)
+    + draw(surface: Surface): void
+    + is_clicked(pos: tuple[int, int]): bool
+}
+
+class World {
+    - level: int
+    - game_speed: int
+    - health: int
+    - money: int
+    - tile_map: list[int]
+    - waypoints: list[tuple[int, int]]
+    - level_data: dict
+    - image: Surface
+    - enemy_list: list[str]
+    - spawned_enemy: int
+    - killed_enemies: int
+    - missed_enemies: int
+    + __init__(data: dict, map_image: Surface)
+    + process_data(): void
+    + process_Waypoints(data: list): void
+    + check_level_completed(): bool
+    + reset_level(): void
+    + draw(surface: Surface): void
+    + process_enemys(): void
+}
+
+World "1" -- "many" Enemy: manages
+World "1" -- "many" Turret: manages
+ImageTextButton <|-- Button: extends
+
+@enduml
