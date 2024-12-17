@@ -12,38 +12,34 @@ from imagentexto import ImageTextButton
  #initialise pygame
 pg.init()
 
-#create clock
+#crear reloj
 clock = pg.time.Clock()
 
 
 
-# create game window
+# crear ventana de juego
 screen = pg.display.set_mode((c.SCREEN_WIDTH + c.Side_Panel,c.SCREEN_HEIGHT))
 pg.display.set_caption("Last Bastion TD")
 
-#load fonts for displaying text on the screen
+#cargar fuentes para los textos
 text_font = pg.font.SysFont("Consolas",24,bold = True)
 large_font = pg.font.SysFont("Consolas",36)
 
-# function for outputting text with img in the menu
 
 
-
-#functio0n for outputting text opn the screen
+#functio0n para mostrar el texto en la imagen
 def draw_text(text,font,text_col,x,y):
     img = font.render(text,True,text_col)
     screen.blit(img,(x,y))
 
 
- 
-
 def main_menu():
 
-    # Load button images
+    # Cargar Imagenes de los botones
     start_btn_img = pg.image.load("assets/images/gui/start.png").convert_alpha()
     exit_btn_img = pg.image.load("assets/images/gui/exit.png").convert_alpha()
 
-    # Create exit and start Buttons 
+    # Crear botones de Exit y Start 
     start_btn = ImageTextButton(c.SCREEN_WIDTH/2 - 100, 300, start_btn_img, "Start" , large_font , "Black")
     exit_btn = ImageTextButton(c.SCREEN_WIDTH/2 -100, 400 , exit_btn_img, "Exit" , large_font , "Black")
 
@@ -51,10 +47,10 @@ def main_menu():
     running = True
     while running:
         screen.fill("gray")
-        draw_text("Steel Legions",large_font,"Black", c.SCREEN_WIDTH / 2, 100)
+        draw_text("Last Bastion TD",large_font,"Black", c.SCREEN_WIDTH / 2, 100)
         
         
-        #Draw Buttons
+        #Dibujar Botones
         start_btn.draw(screen)
         exit_btn.draw(screen)
         
@@ -114,7 +110,7 @@ def pause_menu():
 
 def game_Screen():
 
-#game variables
+#variables de juego
     game_over = False
     game_outcome = 0 # -1 is lose & 1 is win
     level_started = False
